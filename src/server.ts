@@ -8,5 +8,5 @@ app.register(ordersRoutes);
 
 app.register(webhookRoutes);
 
-app.listen({ port: 3000 })
+await app.listen({ port: 3000 })
 console.log("Server running on http://localhost:3000");
