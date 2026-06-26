@@ -4,7 +4,7 @@
   "description": "Bem-vindo(a) ao desafio técnico da **Upsurge**. O objetivo aqui não é \"passar num teste\", e sim nos dar uma amostra real de como você pensa e constrói software backend no domínio em que a gente vive: **pagamentos**.",
   "main": "index.js",
   "scripts": {
-    "type": "commonjs"
+    "dev": "tsx src/server.ts"
   },
   "repository": {
     "type": "git",
@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@types/node": "^26.0.1",
+    "@types/pg": "^8.20.0",
     "drizzle-kit": "^0.31.10",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3"
