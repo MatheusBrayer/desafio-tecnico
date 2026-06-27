@@ -179,3 +179,213 @@ Não buscamos a solução "certa" única. Buscamos entender **como você decide*
 Ficou algo ambíguo no enunciado? Faça uma suposição razoável, **registre-a no README** e siga em frente - é exatamente assim que trabalhamos com problemas reais. Se preferir, pode também nos perguntar diretamente.
 
 Boa sorte. Estamos animados para ver o que você vai construir.
+
+<br>
+<br>
+<br>
+
+#  Desafio Técnico
+
+API REST desenvolvida para gerenciamento de pedidos e simulação de pagamentos, com suporte a webhook e idempotência.
+
+---
+
+## Sobre o desafio
+
+Este projeto foi desenvolvido como parte de um desafio técnico com os seguintes requisitos:
+
+- Criar pedidos com itens, quantidade e preço  
+- O valor total deve ser calculado no backend  
+- Suportar métodos de pagamento (`card`, `pix`, `boleto`)  
+- Implementar um webhook de pagamento  
+- Garantir idempotência no processamento do webhook  
+- Persistir dados utilizando PostgreSQL e ORM  
+
+---
+
+## Implementação
+
+A API foi desenvolvida seguindo boas práticas de arquitetura backend, com separação de responsabilidades e foco em consistência de dados.
+
+---
+
+## Funcionalidades
+
+- Criação de pedidos com cálculo automático do total  
+- Simulação de pagamento:
+  - `card` → aprovado automaticamente  
+  - `pix` → aguardando pagamento com código gerado  
+  - `boleto` → aguardando pagamento com código gerado  
+- Consulta de pedidos (listagem e detalhamento)  
+- Webhook para atualização de pagamento  
+- Idempotência no processamento de eventos  
+- Autenticação via Bearer Token  
+- Validação de dados de entrada  
+
+---
+
+## Decisões de Arquitetura
+
+- Separação de responsabilidades em camadas (controllers, use-cases e database)  
+- Uso de use-cases para centralizar regras de negócio  
+- Middlewares para autenticação e validação de dados  
+- Implementação de webhook com controle de idempotência via `event_id`  
+- Uso de Drizzle ORM para tipagem forte e controle de queries  
+- Organização do projeto visando escalabilidade e manutenibilidade  
+
+---
+
+## Tecnologias utilizadas
+
+- Node.js  
+- Fastify  
+- PostgreSQL  
+- Drizzle ORM  
+- Docker  
+
+---
+
+## Estrutura do projeto
+```
+src/
+├── application/
+│   └── use-cases/
+│       ├── create-order.ts
+│       ├── get-orders.ts
+│       ├── get-order-by-id.ts
+│       └── process-payment.ts
+│
+├── db/
+│   ├── index.ts
+│   └── schema.ts
+│
+├── http/
+│   ├── controllers/
+│   │   ├── orders.controller.ts
+│   │   └── webhook.controller.ts
+│   │
+│   ├── middlewares/
+│   │   ├── auth.ts
+│   │   └── validate-create-order.ts
+│   │
+│   └── routes/
+│       ├── orders.ts
+│       └── webhook.ts
+│
+└── server.ts
+```
+---
+
+## Como rodar o projeto
+
+### 1. Instalar dependências
+
+`npm install`
+
+### 2. Subir o banco com Docker
+`docker compose up -d`
+
+### 3. Configurar variável de ambiente
+Crie um arquivo .env na raiz:
+`DATABASE_URL=postgresql://postgres:postgres@localhost:5433/payments_db`
+
+### 4. Criar tabelas no banco
+`npx drizzle-kit push`
+
+### 5. Rodar o servidor
+`npm run dev`
+
+---
+
+# Autenticação
+Endpoints protegidos utilizam Bearer Token:
+
+`Authorization: Bearer secret-token`
+
+---
+
+# Endpoints
+- Criar pedido
+  
+  `POST /orders`
+
+- Listar pedidos
+  
+  `GET /orders`
+
+
+- Buscar pedido por ID
+  
+  `GET /orders/:id`
+
+
+- Webhook de pagamento
+  
+  `POST /webhook/payment`
+
+---
+
+# Webhook e Idempotência
+O endpoint /webhook/payment simula notificações de um gateway de pagamento.
+### Como funciona
+
+Cada evento possui um `event_id`
+
+O sistema garante que cada evento seja processado apenas uma vez
+
+
+### Comportamento esperado
+
+Primeira chamada → evento processado e pedido atualizado
+
+Chamadas duplicadas → ignoradas
+
+### Exemplo de requisição
+```
+{
+  "event_id": "evt_1",
+  "order_id": "uuid-do-pedido",
+  "status": "approved"
+}
+```
+### Exemplo de resposta
+```
+{
+  "message": "Webhook processed"
+}
+```
+
+### Requisição duplicada
+```
+{
+  "message": "Event already processed"
+}
+```
+---
+
+# Observações importantes
+
+- O valor total do pedido nunca é recebido do cliente
+- Todos os cálculos são realizados no backend
+- O sistema foi projetado com separação de responsabilidades
+- O webhook trata cenários reais como eventos duplicados e reenvio de notificações
+
+---
+
+# Melhorias Futuras
+Se houvesse mais tempo, seriam implementadas as seguintes melhorias:
+
+- Uso de transações no processamento do webhook
+- Idempotência mais robusta utilizando ON CONFLICT DO NOTHING
+- Validação de dados utilizando schema (ex: Zod)
+- Implementação de logs estruturados
+- Testes automatizados (unitários e integração)
+- Deploy da aplicação em ambiente cloud (ex: Railway)
+
+---
+
+# Documentação
+A documentação completa da API está disponível na coleção do Postman incluída no projeto:
+
+https://documenter.getpostman.com/view/46945043/2sBXwyG7FW
+
