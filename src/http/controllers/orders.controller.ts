@@ -12,6 +12,8 @@ export async function createOrderController(
 
     return reply.send(result);
   } catch (error: any) {
+    console.log("ERRO AQUI 👉", error); // 👈 adiciona isso
+
     if (error.message === "Invalid input") {
       return reply.status(400).send({ error: error.message });
     }
@@ -44,3 +46,4 @@ export async function getOrderByIdController(
     return reply.status(404).send({ error: error.message });
   }
 }
+
